@@ -9,12 +9,14 @@ function love.load()
 
     player.x = love.graphics.getWidth() / 2
     player.y = love.graphics.getHeight() / 2
-    player.speed = 200
+    player.speed = 500
     player.img = love.graphics.newImage('purple.png')
     player.ground = player.y
     player.y_velocity = 0
-    player.jump_height = -300
-    player.gravity = -500
+    player.jump_power = -900
+    player.gravity = 3900
+    player.max_fall_speed = 1800
+    player.grounded = true
 end
 
 function love.update(dt)
@@ -28,17 +30,21 @@ function love.update(dt)
         player.x = player.x - (player.speed * dt)
     end
 
-    if love.keyboard.isDown('space') and player.y_velocity == 0 then
-        player.y_velocity = player.jump_height
+    if love.keyboard.isDown('space') and player.grounded then
+        player.y_velocity = player.jump_power
+        player.grounded = false
     end
 
-    if player.y_velocity ~= 0 then
+    if not player.grounded then
+        player.y_velocity = player.y_velocity + player.gravity * dt
+        player.y_velocity = math.min(player.y_velocity, player.max_fall_speed)
         player.y = player.y + player.y_velocity * dt
-        player.y_velocity = player.y_velocity - player.gravity * dt
+    else
+        player.y_velocity = 0
     end
 
-    if player.y > player.ground then
-        player.y_velocity = 0
+    player.grounded = player.y >= player.ground
+    if player.grounded then
         player.y = player.ground
     end
 end
